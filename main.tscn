@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3 uid="uid://c181dra81ijhc"]
+
+[ext_resource type="Script" path="res://main.gd" id="1_cdggd"]
+[ext_resource type="PackedScene" uid="uid://b3xdlgifnyt8i" path="res://scenes/ProceduralBuilding.tscn" id="2_fvgbo"]
+[ext_resource type="PackedScene" uid="uid://dnm3rdbgj8onl" path="res://scenes/Car.tscn" id="3_ixbwf"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4fhge"]
+size = Vector3(1200, 2, 1200)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n4vdp"]
+albedo_color = Color(1, 0.933333, 0.8, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_eursk"]
+material = SubResource("StandardMaterial3D_n4vdp")
+size = Vector3(1200, 2, 1200)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_22bmb"]
+albedo_color = Color(0.164706, 0.192157, 1, 1)
+
+[node name="Main" type="Node"]
+script = ExtResource("1_cdggd")
+building_scene = ExtResource("2_fvgbo")
+max_radius = 600
+min_radius = 400
+min_area = 4800
+offset_poly = -10.0
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, -1, 2.08165e-12)
+visible = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_4fhge")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_eursk")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, -5.95416e-16, 2.4663e-16, 2.4663e-16, 0.707107, 0.707107, -5.95416e-16, -0.707107, 0.707107, 2.08165e-12, 30, 2.08165e-12)
+shadow_bias = 0.3
+shadow_normal_bias = 5.0
+
+[node name="MapView" type="Camera3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, 4.37114e-08, -1.5246e-23, -4.37114e-08, 1, 1, 4.37114e-08, 1.91069e-15, 2.08165e-12, 110, 2.08165e-12)
+projection = 1
+size = 1200.0
+
+[node name="WaterCSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, -6, 2.08165e-12)
+use_collision = true
+size = Vector3(4800, 2, 4800)
+material = SubResource("StandardMaterial3D_22bmb")
+
+[node name="Car" parent="." instance=ExtResource("3_ixbwf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 2, 2.08165e-12)

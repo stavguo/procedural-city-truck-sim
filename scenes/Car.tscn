@@ -1,0 +1,101 @@
+[gd_scene load_steps=6 format=3 uid="uid://dnm3rdbgj8onl"]
+
+[ext_resource type="Script" path="res://scripts/Car.gd" id="1_xb2gi"]
+[ext_resource type="PackedScene" uid="uid://csftpnswbqoun" path="res://scenes/WheelModel.tscn" id="2_4kxhf"]
+[ext_resource type="PackedScene" uid="uid://8sl5gmdd6o6w" path="res://scenes/Camera3D.tscn" id="3_amupv"]
+[ext_resource type="PackedScene" uid="uid://dkisky3hfeiu8" path="res://scenes/KeiModel.tscn" id="4_gwcox"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_norm2"]
+size = Vector3(1, 1, 2.61)
+
+[node name="Car" type="VehicleBody3D"]
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.1, 0)
+script = ExtResource("1_xb2gi")
+STEER_LIMIT = 0.8
+engine_force_value = 90
+
+[node name="FrontPassengerWheel" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.174, -0.7)
+use_as_traction = true
+use_as_steering = true
+wheel_roll_influence = 0.5
+wheel_radius = 0.2
+wheel_friction_slip = 3.0
+suspension_travel = 0.357
+suspension_stiffness = 30.0
+suspension_max_force = 10000.0
+
+[node name="Mesh" parent="FrontPassengerWheel" instance=ExtResource("2_4kxhf")]
+transform = Transform3D(-1.08404e-08, -8.64991e-17, -0.248, 8.64991e-17, 0.248, -8.64991e-17, 0.248, -8.64991e-17, -1.08404e-08, 0, 0, 0)
+
+[node name="FrontDriverWheel" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.174, -0.7)
+use_as_traction = true
+use_as_steering = true
+wheel_roll_influence = 0.5
+wheel_radius = 0.2
+wheel_friction_slip = 3.0
+suspension_travel = 0.357
+suspension_stiffness = 30.0
+suspension_max_force = 10000.0
+
+[node name="Mesh" parent="FrontDriverWheel" instance=ExtResource("2_4kxhf")]
+transform = Transform3D(-1.08404e-08, 8.64991e-17, 0.248, 8.64991e-17, 0.248, -8.64991e-17, -0.248, 8.64991e-17, -1.08404e-08, 0, 0, 0)
+
+[node name="RearPassengerWheel" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.174, 0.7)
+use_as_traction = true
+wheel_roll_influence = 0.5
+wheel_radius = 0.2
+wheel_friction_slip = 3.0
+suspension_travel = 0.357
+suspension_stiffness = 30.0
+suspension_max_force = 10000.0
+
+[node name="Mesh" parent="RearPassengerWheel" instance=ExtResource("2_4kxhf")]
+transform = Transform3D(-1.08404e-08, -8.64991e-17, -0.248, 8.64991e-17, 0.248, -8.64991e-17, 0.248, -8.64991e-17, -1.08404e-08, 0, 0, 0)
+
+[node name="RearDriverWheel" type="VehicleWheel3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.174, 0.7)
+use_as_traction = true
+wheel_roll_influence = 0.5
+wheel_radius = 0.2
+wheel_friction_slip = 3.0
+suspension_travel = 0.357
+suspension_stiffness = 30.0
+suspension_max_force = 10000.0
+
+[node name="Mesh" parent="RearDriverWheel" instance=ExtResource("2_4kxhf")]
+transform = Transform3D(-1.08404e-08, 8.64991e-17, 0.248, 8.64991e-17, 0.248, -8.64991e-17, -0.248, 8.64991e-17, -1.08404e-08, 0, 0, 0)
+
+[node name="Look" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2149, 0)
+
+[node name="Camera3D" parent="Look" instance=ExtResource("3_amupv")]
+transform = Transform3D(1, 0, 0, 0, 0.974347, 0.225053, 0, -0.225053, 0.974347, 0, 1.97324, 6.19962)
+target_distance = 6
+target_height = 3
+speed = 10.0
+
+[node name="Hud" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="Speed" type="Label" parent="Hud"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -20.0
+offset_top = -23.0
+offset_right = 20.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 50
+
+[node name="Mesh" parent="." instance=ExtResource("4_gwcox")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.661573, 0)
+shape = SubResource("BoxShape3D_norm2")

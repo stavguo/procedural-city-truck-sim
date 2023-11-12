@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://da3kee4fr3xw0"]
+
+[ext_resource type="Script" path="res://scripts/FreeCam.gd" id="1_ehmpy"]
+
+[node name="FreeCam" type="Camera3D"]
+transform = Transform3D(0.707107, 0.353553, -0.612373, 3.02058e-16, 0.866026, 0.5, 0.707107, -0.353553, 0.612373, -600, 300, 600)
+visible = false
+current = true
+far = 1700.0
+script = ExtResource("1_ehmpy")
+sensitivity = 1.0
