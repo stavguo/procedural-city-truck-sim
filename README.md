@@ -1,5 +1,5 @@
-# Procedurally-Generated City + Truck Simulator
-A truck simulator implemented in Godot, set in a procedurally-generated city using [OBB (Object Aligned Bounding Box) Parcelling](https://github.com/stavguo/obb-parcelling).
+# Procedural City Generation and Driving Simulator in Godot
+Drive through a procedurally-generated city using [OBB (Object Aligned Bounding Box) Parcelling](https://github.com/stavguo/obb-parcelling).
 
 ![example1](./example1.png)
 ![example2](./example2.png)
