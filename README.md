@@ -27,6 +27,26 @@ The main logic can be found in the script associated with the parent node, Node2
 * ```points``` (int): The amount of points ```N``` to be generated on the circumference.
 * ```min_area``` (int): Minimum area of parcel. Once area is less than ```min_area```, recursion ends and parcel is created.
 
+## Roadmap
+- [x] Finish car controller
+- [x] Add colliders to buildings
+- [x] Scale world to be larger and more accurate
+- [ ] Add fast travel
+- [x] Make island, surround with water
+- [ ] Add parks
+- [ ] Incorporate Godot Road Generator
+- [ ] Add loading screen to beginning
+- [ ] Implement shadows
+- [ ] Building materials
+    - [ ] Brick types
+    - [ ] Window types
+- [ ] Create mlutiple islands using noise:
+    - [ ] Poisson disc sample to generate points
+    - [ ] Use voronoi to form land blocks
+    - [ ] Group land blocks together to form islands
+- [ ] Use geometry to find closest island coast edge to create bridge
+- [ ] Create toon shader
+- [ ] Add skybox
 To register changes, press the ```Tab``` button on your keyboard after modifying an inspector field. Then save the changes and rerun the project.
 ## Credits
 * This project was inspired by "[Procedural Generation of Parcels in Urban Modeling](https://www.cs.purdue.edu/cgvlab/papers/aliaga/eg2012.pdf)"
