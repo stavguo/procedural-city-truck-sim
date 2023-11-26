@@ -1,9 +1,10 @@
 extends Node3D
 
-func initialize(ground_points: PackedVector2Array, bottom: float, top: float) -> void:
+func initialize(ground_points: PackedVector2Array, bottom: float, top: float, 
+		building_color: Color) -> void:
 	# Make building material
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = GeometryHelper.get_random_color()
+	mat.albedo_color = building_color
 	mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
 	
 	# Make walls

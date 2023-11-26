@@ -41,12 +41,14 @@ The main logic can be found in the script associated with the parent node, Node2
     - [ ] Brick types
     - [ ] Window types
 - [ ] Create mlutiple islands using noise:
-    - [ ] Poisson disc sample to generate points
-    - [ ] Use voronoi to form land blocks
+    - [x] Poisson disc sample to generate points
+    - [x] Use voronoi to form land blocks
     - [ ] Group land blocks together to form islands
 - [ ] Use geometry to find closest island coast edge to create bridge
 - [ ] Create toon shader
 - [ ] Add skybox
+- [ ] Add sound
+- [ ] Improve speedometer/GUI
 To register changes, press the ```Tab``` button on your keyboard after modifying an inspector field. Then save the changes and rerun the project.
 ## Credits
 * This project was inspired by "[Procedural Generation of Parcels in Urban Modeling](https://www.cs.purdue.edu/cgvlab/papers/aliaga/eg2012.pdf)"
@@ -55,3 +57,5 @@ by Carlos A. Vanegas, Tom Kelly, Basil Weber, Jan Halatsch, Daniel G. Aliaga, an
 * The method for creating the city blocks was inspired by Mitch Wheat's [stack overflow answer](https://stackoverflow.com/a/8997139).
 * [Color palette](https://lospec.com/palette-list/curiosities) created by sukinapan
 * [Kei truck model](https://skfb.ly/oHGXY) created by Fehungcom1
+* [poisson-disc-sampling](https://github.com/udit/poisson-disc-sampling)
+* [gdDelaunay](https://github.com/bartekd97/gdDelaunay)

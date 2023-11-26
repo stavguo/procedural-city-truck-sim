@@ -1,23 +1,36 @@
 extends Node
+
 @export var building_scene: PackedScene
-@export var max_radius: int = 25
-@export var min_radius: int = 15
-@export var points: int = 9
-@export var min_area: int = 10
-@export var offset_poly: float = -0.5
-@export var floor_multiplier: float = 7.0
-@export var min_floor_height: float = 10.0
+@export var car_scene: PackedScene
+
+@export var poisson_width: int = 1200
+@export var poisson_height: int = 1200
+@export var poisson_radius: int = 200
+@export var poisson_retries: int = 30
+@export var min_area: int = 7200
+@export var offset_poly: float = -10
+@export var floor_height: int = 5
+@export var min_floors: int = 2
+@export var max_floors: int = 7
+
 
 @onready var mapView = $MapView
-
-var fastNoiseLite = FastNoiseLite.new()
+var fastNoiseLite
+var spawn_locations: Array[PackedVector2Array] = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	create_fast_noise_lite()
-	var vert_arr = get_init_points()
-	var obb_arr = get_obb(vert_arr)
-	subdivide(vert_arr, obb_arr)
+	create_random_generator()
+	create_points()
+	var spawn_pos = spawn_locations[randi_range(0,spawn_locations.size() - 1)]
+	var mid = midpoint(spawn_pos[0], spawn_pos[1])
+	var car = car_scene.instantiate()
+	car.set_position(Vector3(mid.x,2,mid.y))
+	add_child(car)
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
 
 func _input(event):
 	if event.is_action_pressed("quit"):
@@ -27,49 +40,54 @@ func _input(event):
 	if event.is_action_pressed("screenshot"):
 		var image = get_viewport().get_texture().get_image()
 		image.save_png("screenshots/%s.png" % randi())
-	# TODO: Create ortho birds-eye-view camera to switch to
 	if event.is_action_pressed("map"):
 		if mapView.current: mapView.current = false
 		else: mapView.current = true
 
-func create_fast_noise_lite():
+func create_points():
+	var rect = Rect2(0,0,poisson_width,poisson_height)
+	var delaunay = Delaunay.new(rect)
+	var corners = PackedVector2Array([
+		Vector2(0, poisson_height),
+		Vector2(0, 0),
+		Vector2(poisson_width, 0),
+		Vector2(poisson_width, poisson_height)
+	])
+	var points: Array = PoissonDiscSampling.generate_points_for_polygon(corners,
+		poisson_radius, poisson_retries)
+	for i in range(points.size()):
+		delaunay.add_point(points[i])
+	var triangles = delaunay.triangulate()
+	var sites = delaunay.make_voronoi(triangles)
+	for site in sites:
+		if !delaunay.is_border_site(site):
+			if site.neighbours.size() == site.source_triangles.size():
+				# TODO: Get all centers later and then choose land/water
+				#if fastNoiseLite.get_noise_2dv(site.center) > 0:
+				var building = building_scene.instantiate()
+				building.initialize(site.polygon, 0.0, 1,
+					Color('#ffeecc'))
+				add_child(building)
+				var obb_arr = get_obb(site.polygon)
+				subdivide(site.polygon, obb_arr)
+				#var packed = PackedVector2Array(site.polygon)
+				#print(packed)
+				#for n in site.neighbours:
+					#print("a : %s" % n.a)
+					#print("b : %s" % n.b)
+					#print("this : %s" % n.this)
+					#print("other : %s" % n.other)
+
+func create_random_generator():
 	var rng = RandomNumberGenerator.new()
 	rng.randomize()
-	fastNoiseLite.seed = rng.randi_range(0, 500)
+	fastNoiseLite = FastNoiseLite.new()
+	fastNoiseLite.seed = rng.randi_range(0,500)
 	fastNoiseLite.noise_type = FastNoiseLite.TYPE_SIMPLEX
-	fastNoiseLite.fractal_gain = 1.0
-	# TODO: Set fractal octives and gain = 0
+	fastNoiseLite.set_frequency(0.0005)
 
-func get_noise(vec: Vector2) -> float:
-	var noise = (fastNoiseLite.get_noise_2dv(vec) + 1) / 2
-	return max(int(noise * 10) * 10, min_floor_height)
-
-func get_init_points():
-	var rads = 0
-	var vert_arr = PackedVector2Array()
-	for i in range(points):
-		var dist = randf_range(min_radius, max_radius)
-		vert_arr.append(Vector2(cos(rads) * dist, sin(rads) * dist))
-		rads -= ((2 * PI) / points)
-	make_island(vert_arr)
-	return vert_arr
-
-func make_island(vert_arr: PackedVector2Array) -> void:
-	var ground_points = Geometry2D.offset_polygon(vert_arr, -offset_poly, Geometry2D.JOIN_MITER)[0]
-	# Make ground material 
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color('#ffeecc')
-	mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
-	
-	# Make ground
-	var ground: Array[MeshInstance3D] = GeometryHelper.make_roof(ground_points,
-		0.0, mat)
-	for i in range(ground.size()):
-		add_child(ground[i])
-	var sides: Array[MeshInstance3D] = GeometryHelper.make_walls(ground_points,
-		-5.0, 0.0, mat)
-	for i in range(sides.size()):
-		add_child(sides[i])
+func midpoint(p1: Vector2, p2: Vector2) -> Vector2:
+	return (p1 + p2) / 2
 
 func get_rect_dimensions(vert_arr: PackedVector2Array):
 	var top = -INF
@@ -159,10 +177,14 @@ func subdivide(vert_arr: PackedVector2Array, obb_arr: PackedVector2Array):
 	var obb_arr1 = get_obb(split_data.p1)
 	var obb_arr2 = get_obb(split_data.p2)
 	if too_small(obb_arr1) or too_small(obb_arr2):
+		for i in range(vert_arr.size()):
+			spawn_locations.append(PackedVector2Array([vert_arr[i],
+				vert_arr[(i + 1) % vert_arr.size()]]))
 		var offset_arr = Geometry2D.offset_polygon(vert_arr, offset_poly, Geometry2D.JOIN_MITER)
 		var building = building_scene.instantiate()
-		var center = polygon_to_rect(obb_arr).get_center()
-		building.initialize(offset_arr[0], 0.0, get_noise(center))
+		building.initialize(offset_arr[0], 0.0,
+			floor_height * randi_range(min_floors, max_floors),
+			GeometryHelper.get_random_color())
 		add_child(building)
 	else:
 		subdivide(split_data.p1, obb_arr1)
