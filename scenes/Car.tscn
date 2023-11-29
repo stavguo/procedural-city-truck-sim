@@ -1,9 +1,17 @@
-[gd_scene load_steps=6 format=3 uid="uid://dnm3rdbgj8onl"]
+[gd_scene load_steps=11 format=3 uid="uid://dnm3rdbgj8onl"]
 
 [ext_resource type="Script" path="res://scripts/Car.gd" id="1_xb2gi"]
 [ext_resource type="PackedScene" uid="uid://csftpnswbqoun" path="res://scenes/WheelModel.tscn" id="2_4kxhf"]
 [ext_resource type="PackedScene" uid="uid://8sl5gmdd6o6w" path="res://scenes/Camera3D.tscn" id="3_amupv"]
 [ext_resource type="PackedScene" uid="uid://dkisky3hfeiu8" path="res://scenes/KeiModel.tscn" id="4_gwcox"]
+[ext_resource type="Texture2D" uid="uid://vff3fp7hg5x6" path="res://assets/materials/UI/black_circle.png" id="4_shilg"]
+[ext_resource type="Shader" path="res://assets/shaders/Minimap.gdshader" id="5_sxiln"]
+[ext_resource type="Script" path="res://scripts/FollowPlayerMinimap.gd" id="6_usem7"]
+[ext_resource type="Texture2D" uid="uid://bj8sb4qd75xx0" path="res://assets/materials/UI/maps-arrow.svg" id="8_dqhi5"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xw00x"]
+shader = ExtResource("5_sxiln")
+shader_parameter/radius = 1.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_norm2"]
 size = Vector3(1, 1, 2.61)
@@ -74,6 +82,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2149, 0)
 
 [node name="Camera3D" parent="Look" instance=ExtResource("3_amupv")]
 transform = Transform3D(1, 0, 0, 0, 0.974347, 0.225053, 0, -0.225053, 0.974347, 0, 1.97324, 6.19962)
+cull_mask = 1048573
 target_distance = 6
 target_height = 3
 speed = 10.0
@@ -94,8 +103,55 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 50
 
+[node name="TextureRect" type="TextureRect" parent="Hud"]
+self_modulate = Color(1, 1, 1, 0.45098)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -552.0
+offset_right = 552.0
+offset_bottom = -40.0
+grow_vertical = 0
+scale = Vector2(0.75, 0.75)
+pivot_offset = Vector2(2.08165e-12, 512)
+size_flags_horizontal = 0
+size_flags_vertical = 8
+texture = ExtResource("4_shilg")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="Hud/TextureRect"]
+material = SubResource("ShaderMaterial_xw00x")
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -512.0
+offset_right = 512.0
+grow_vertical = 0
+
+[node name="SubViewport" type="SubViewport" parent="Hud/TextureRect/SubViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="Hud/TextureRect/SubViewportContainer/SubViewport"]
+transform = Transform3D(1, -6.97574e-16, -1.5246e-23, -1.5246e-23, -4.37114e-08, 1, -6.97574e-16, -1, -4.37114e-08, 0, 44.2625, 0)
+cull_mask = 2
+projection = 1
+size = 15.0
+script = ExtResource("6_usem7")
+_followScanRadius = 90.0
+_playerTarget = NodePath("../../../../..")
+_playerRotationTarget = NodePath("../../../../../Look/Camera3D")
+
 [node name="Mesh" parent="." instance=ExtResource("4_gwcox")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.661573, 0)
 shape = SubResource("BoxShape3D_norm2")
+
+[node name="RadarObject" type="Sprite3D" parent="."]
+transform = Transform3D(-1, -8.74228e-08, 3.82137e-15, -1.5246e-23, -4.37114e-08, -1, 8.74228e-08, -1, 4.37114e-08, 2.08165e-12, 2, 2.08165e-12)
+layers = 2
+pixel_size = 0.12
+texture = ExtResource("8_dqhi5")

@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bgt3xpow2rw8n"]
+
+[ext_resource type="Texture2D" uid="uid://bkrtlkduq1tyx" path="res://assets/materials/buildings/prentis.png" id="1_tjsg4"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(9.88, 0, 0, 0, 9.88, 0, 0, 0, 9.88, 0, 0, 0)
+texture_filter = 0
+texture = ExtResource("1_tjsg4")

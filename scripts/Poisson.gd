@@ -65,9 +65,15 @@ func create_points():
 				# TODO: Get all centers later and then choose land/water
 				#if fastNoiseLite.get_noise_2dv(site.center) > 0:
 				var building = building_scene.instantiate()
-				building.initialize(site.polygon, 0.0, 1,
-					Color('#ffeecc'))
+				var mat = StandardMaterial3D.new()
+				mat.albedo_color = Color('#ffeecc')
+				mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
+				building.initialize(site.polygon, 0.0, 1, mat)
 				add_child(building)
+				
+				# Make radar object
+				create_radar_polygon(site.polygon, Color(10.6/255, 9.0/255, 10.2/255, 0.1))
+				
 				var obb_arr = get_obb(site.polygon)
 				subdivide(site.polygon, obb_arr)
 				#var packed = PackedVector2Array(site.polygon)
@@ -77,6 +83,17 @@ func create_points():
 					#print("b : %s" % n.b)
 					#print("this : %s" % n.this)
 					#print("other : %s" % n.other)
+
+func create_radar_polygon(points: PackedVector2Array, color: Color) -> void:
+	# Make radar object
+	var mat = StandardMaterial3D.new()
+	mat.flags_transparent = true
+	mat.albedo_color = color
+	mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
+	var radar: Array[MeshInstance3D] = GeometryHelper.make_building_radar_object(
+		points, mat)
+	for i in range(radar.size()):
+		add_child(radar[i])
 
 func create_random_generator():
 	var rng = RandomNumberGenerator.new()
@@ -182,10 +199,28 @@ func subdivide(vert_arr: PackedVector2Array, obb_arr: PackedVector2Array):
 				vert_arr[(i + 1) % vert_arr.size()]]))
 		var offset_arr = Geometry2D.offset_polygon(vert_arr, offset_poly, Geometry2D.JOIN_MITER)
 		var building = building_scene.instantiate()
+		
+		# Make building material
+		var mat = StandardMaterial3D.new()
+		mat.albedo_color = GeometryHelper.get_random_color()
+		#	var img = Image.new()
+		#	img.load("res://assets/materials/buildings/prentis.png")
+		#	var tex = ImageTexture.create_from_image(img)
+		#	#tex.set_size_override(Vector2i(512,512))
+		#	mat.set_texture(BaseMaterial3D.TEXTURE_ALBEDO, tex)
+		#	#mat.set_flag(BaseMaterial3D.FLAG_ALBEDO_TEXTURE_FORCE_SRGB, true)
+		#	mat.set_flag(BaseMaterial3D.FLAG_USE_TEXTURE_REPEAT, true)
+		#	mat.set_texture_filter(BaseMaterial3D.TEXTURE_FILTER_NEAREST)
+		mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
+		
+		
+		
 		building.initialize(offset_arr[0], 0.0,
-			floor_height * randi_range(min_floors, max_floors),
-			GeometryHelper.get_random_color())
+			floor_height * randi_range(min_floors, max_floors), mat)
 		add_child(building)
+		
+		# Make radar object
+		create_radar_polygon(offset_arr[0], Color(10.6/255, 9.0/255, 10.2/255, 0.45))
 	else:
 		subdivide(split_data.p1, obb_arr1)
 		subdivide(split_data.p2, obb_arr2)
