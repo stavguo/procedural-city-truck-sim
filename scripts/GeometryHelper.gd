@@ -90,7 +90,7 @@ static func make_roof(ground_points: PackedVector2Array, height: float,
 	return meshes
 
 static func make_building_radar_object(ground_points: PackedVector2Array,
-	mat: StandardMaterial3D) -> Array[MeshInstance3D]:
+		height: int, mat: StandardMaterial3D) -> Array[MeshInstance3D]:
 	var meshes: Array[MeshInstance3D] = []
 	var tris = Geometry2D.triangulate_polygon(ground_points)
 	for i in range(0, tris.size(), 3):
@@ -103,13 +103,13 @@ static func make_building_radar_object(ground_points: PackedVector2Array,
 		var third = ground_points[tris[i+ 2]]
 		
 		surface_tool.set_normal(Vector3(1, 1, 1));
-		surface_tool.add_vertex(Vector3(first.x, 0, first.y));
+		surface_tool.add_vertex(Vector3(first.x, height, first.y));
 		
 		surface_tool.set_normal(Vector3(1, 1, 1));
-		surface_tool.add_vertex(Vector3(second.x, 0, second.y));
+		surface_tool.add_vertex(Vector3(second.x, height, second.y));
 		
 		surface_tool.set_normal(Vector3(1, 1, 1));
-		surface_tool.add_vertex(Vector3(third.x, 0, third.y));
+		surface_tool.add_vertex(Vector3(third.x, height, third.y));
 		
 		surface_tool.add_index(0);
 		surface_tool.add_index(1);
@@ -118,5 +118,6 @@ static func make_building_radar_object(ground_points: PackedVector2Array,
 		var mesh_inst = MeshInstance3D.new()
 		mesh_inst.mesh = surface_tool.commit()
 		mesh_inst.set_layer_mask_value(2, true)
+		mesh_inst.set_layer_mask_value(3, true)
 		meshes.append(mesh_inst)
 	return meshes

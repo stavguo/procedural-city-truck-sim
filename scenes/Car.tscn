@@ -1,8 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://dnm3rdbgj8onl"]
+[gd_scene load_steps=12 format=3 uid="uid://dnm3rdbgj8onl"]
 
 [ext_resource type="Script" path="res://scripts/Car.gd" id="1_xb2gi"]
 [ext_resource type="PackedScene" uid="uid://csftpnswbqoun" path="res://scenes/WheelModel.tscn" id="2_4kxhf"]
 [ext_resource type="PackedScene" uid="uid://8sl5gmdd6o6w" path="res://scenes/Camera3D.tscn" id="3_amupv"]
+[ext_resource type="Script" path="res://scenes/Hud.gd" id="4_4plyc"]
 [ext_resource type="PackedScene" uid="uid://dkisky3hfeiu8" path="res://scenes/KeiModel.tscn" id="4_gwcox"]
 [ext_resource type="Texture2D" uid="uid://vff3fp7hg5x6" path="res://assets/materials/UI/black_circle.png" id="4_shilg"]
 [ext_resource type="Shader" path="res://assets/shaders/Minimap.gdshader" id="5_sxiln"]
@@ -82,13 +83,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2149, 0)
 
 [node name="Camera3D" parent="Look" instance=ExtResource("3_amupv")]
 transform = Transform3D(1, 0, 0, 0, 0.974347, 0.225053, 0, -0.225053, 0.974347, 0, 1.97324, 6.19962)
-cull_mask = 1048573
+cull_mask = 1
 target_distance = 6
 target_height = 3
 speed = 10.0
 
 [node name="Hud" type="CanvasLayer" parent="."]
 layer = 2
+script = ExtResource("4_4plyc")
 
 [node name="Speed" type="Label" parent="Hud"]
 anchors_preset = 7
@@ -150,8 +152,15 @@ _playerRotationTarget = NodePath("../../../../../Look/Camera3D")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.661573, 0)
 shape = SubResource("BoxShape3D_norm2")
 
-[node name="RadarObject" type="Sprite3D" parent="."]
+[node name="RadarIcon" type="Sprite3D" parent="."]
 transform = Transform3D(-1, -8.74228e-08, 3.82137e-15, -1.5246e-23, -4.37114e-08, -1, 8.74228e-08, -1, 4.37114e-08, 2.08165e-12, 2, 2.08165e-12)
 layers = 2
 pixel_size = 0.12
+billboard = 1
+texture = ExtResource("8_dqhi5")
+
+[node name="MapIcon" type="Sprite3D" parent="."]
+transform = Transform3D(-1, -1.50996e-07, 6.60024e-15, 0, -4.37114e-08, -1, 1.50996e-07, -1, 4.37114e-08, 2.08165e-12, 2, 2.08165e-12)
+layers = 4
+pixel_size = 0.5
 texture = ExtResource("8_dqhi5")

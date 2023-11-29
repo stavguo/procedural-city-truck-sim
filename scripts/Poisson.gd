@@ -1,4 +1,6 @@
 extends Node
+signal open_map
+signal close_map
 
 @export var building_scene: PackedScene
 @export var car_scene: PackedScene
@@ -27,6 +29,8 @@ func _ready():
 	var car = car_scene.instantiate()
 	car.set_position(Vector3(mid.x,2,mid.y))
 	add_child(car)
+	open_map.connect($Car/Hud.open_map.bind())
+	close_map.connect($Car/Hud.close_map.bind())
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -41,8 +45,12 @@ func _input(event):
 		var image = get_viewport().get_texture().get_image()
 		image.save_png("screenshots/%s.png" % randi())
 	if event.is_action_pressed("map"):
-		if mapView.current: mapView.current = false
-		else: mapView.current = true
+		if mapView.current:
+			close_map.emit()
+			mapView.current = false
+		else:
+			open_map.emit()
+			mapView.current = true
 
 func create_points():
 	var rect = Rect2(0,0,poisson_width,poisson_height)
@@ -72,7 +80,7 @@ func create_points():
 				add_child(building)
 				
 				# Make radar object
-				create_radar_polygon(site.polygon, Color(10.6/255, 9.0/255, 10.2/255, 0.1))
+				#create_radar_polygon(site.polygon, 0, Color(10.6/255, 9.0/255, 10.2/255, 0.1))
 				
 				var obb_arr = get_obb(site.polygon)
 				subdivide(site.polygon, obb_arr)
@@ -83,15 +91,18 @@ func create_points():
 					#print("b : %s" % n.b)
 					#print("this : %s" % n.this)
 					#print("other : %s" % n.other)
+				continue
+		# Make radar object
+		create_radar_polygon(site.polygon, 0, Color(10.6/255, 9.0/255, 10.2/255, 0.45))
 
-func create_radar_polygon(points: PackedVector2Array, color: Color) -> void:
+func create_radar_polygon(points: PackedVector2Array, height: int, color: Color) -> void:
 	# Make radar object
 	var mat = StandardMaterial3D.new()
 	mat.flags_transparent = true
 	mat.albedo_color = color
 	mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
 	var radar: Array[MeshInstance3D] = GeometryHelper.make_building_radar_object(
-		points, mat)
+		points, height, mat)
 	for i in range(radar.size()):
 		add_child(radar[i])
 
@@ -220,7 +231,7 @@ func subdivide(vert_arr: PackedVector2Array, obb_arr: PackedVector2Array):
 		add_child(building)
 		
 		# Make radar object
-		create_radar_polygon(offset_arr[0], Color(10.6/255, 9.0/255, 10.2/255, 0.45))
+		create_radar_polygon(offset_arr[0], 0, Color(10.6/255, 9.0/255, 10.2/255, 0.45))
 	else:
 		subdivide(split_data.p1, obb_arr1)
 		subdivide(split_data.p2, obb_arr2)
