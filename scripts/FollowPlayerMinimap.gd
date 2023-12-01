@@ -13,7 +13,7 @@ func _ready():
 	size = _followScanRadius
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	# For now, camera height is floor height times max floors
 	position = Vector3(_target.position.x, 50, _target.position.z)
 	rotation_degrees.y = _targetRotation.rotation_degrees.y

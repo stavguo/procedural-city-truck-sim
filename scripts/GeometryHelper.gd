@@ -23,19 +23,22 @@ static func make_walls(ground_points: PackedVector2Array, bottom: float,
 		
 		surface_tool.set_material(mat)
 		
+		var uv_width = first.distance_to(second) / 5
+		var uv_height = (top - bottom) / 5
+		
 		# Bottom left?
 		surface_tool.set_normal(Vector3(1, 1, 1))
-		surface_tool.set_uv(Vector2(0,1))
+		surface_tool.set_uv(Vector2(0, uv_height))
 		surface_tool.add_vertex(Vector3(first.x, bottom, first.y))
 		
 		# Bottom right?
 		surface_tool.set_normal(Vector3(1, 1, 1))
-		surface_tool.set_uv(Vector2(1,1))
+		surface_tool.set_uv(Vector2(uv_width, uv_height))
 		surface_tool.add_vertex(Vector3(second.x, bottom, second.y))
 		
 		# Top right?
 		surface_tool.set_normal(Vector3(1, 1, 1))
-		surface_tool.set_uv(Vector2(1,0))
+		surface_tool.set_uv(Vector2(uv_width,0))
 		surface_tool.add_vertex(Vector3(second.x, top, second.y))
 		
 		# Top left?

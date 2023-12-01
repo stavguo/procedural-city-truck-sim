@@ -32,10 +32,6 @@ func _ready():
 	open_map.connect($Car/Hud.open_map.bind())
 	close_map.connect($Car/Hud.close_map.bind())
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
 func _input(event):
 	if event.is_action_pressed("quit"):
 		get_tree().quit()
@@ -76,21 +72,12 @@ func create_points():
 				var mat = StandardMaterial3D.new()
 				mat.albedo_color = Color('#ffeecc')
 				mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
-				building.initialize(site.polygon, 0.0, 1, mat)
+				building.initialize(site.polygon, -1, 0, mat)
 				add_child(building)
 				
-				# Make radar object
-				#create_radar_polygon(site.polygon, 0, Color(10.6/255, 9.0/255, 10.2/255, 0.1))
-				
+				# Begin OBB subdivision on Voronoi cell
 				var obb_arr = get_obb(site.polygon)
 				subdivide(site.polygon, obb_arr)
-				#var packed = PackedVector2Array(site.polygon)
-				#print(packed)
-				#for n in site.neighbours:
-					#print("a : %s" % n.a)
-					#print("b : %s" % n.b)
-					#print("this : %s" % n.this)
-					#print("other : %s" % n.other)
 				continue
 		# Make radar object
 		create_radar_polygon(site.polygon, 0, Color(10.6/255, 9.0/255, 10.2/255, 0.45))
@@ -205,31 +192,31 @@ func subdivide(vert_arr: PackedVector2Array, obb_arr: PackedVector2Array):
 	var obb_arr1 = get_obb(split_data.p1)
 	var obb_arr2 = get_obb(split_data.p2)
 	if too_small(obb_arr1) or too_small(obb_arr2):
+		# Add new spawn locations
 		for i in range(vert_arr.size()):
 			spawn_locations.append(PackedVector2Array([vert_arr[i],
 				vert_arr[(i + 1) % vert_arr.size()]]))
+
+		# Offset buildings to create streets
 		var offset_arr = Geometry2D.offset_polygon(vert_arr, offset_poly, Geometry2D.JOIN_MITER)
 		var building = building_scene.instantiate()
-		
+
 		# Make building material
 		var mat = StandardMaterial3D.new()
-		mat.albedo_color = GeometryHelper.get_random_color()
-		#	var img = Image.new()
-		#	img.load("res://assets/materials/buildings/prentis.png")
-		#	var tex = ImageTexture.create_from_image(img)
-		#	#tex.set_size_override(Vector2i(512,512))
-		#	mat.set_texture(BaseMaterial3D.TEXTURE_ALBEDO, tex)
-		#	#mat.set_flag(BaseMaterial3D.FLAG_ALBEDO_TEXTURE_FORCE_SRGB, true)
-		#	mat.set_flag(BaseMaterial3D.FLAG_USE_TEXTURE_REPEAT, true)
-		#	mat.set_texture_filter(BaseMaterial3D.TEXTURE_FILTER_NEAREST)
+		#mat.albedo_color = GeometryHelper.get_random_color()
+		var img = Image.load_from_file(ProjectSettings.globalize_path("res://assets/materials/buildings/prentis.png"))
+		var tex = ImageTexture.create_from_image(img)
+		#tex.set_size_override(Vector2i(512,512))
+		mat.set_texture(BaseMaterial3D.TEXTURE_ALBEDO, tex)
+		mat.set_flag(BaseMaterial3D.FLAG_USE_TEXTURE_REPEAT, true)
+		mat.set_texture_filter(BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS)
 		mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
-		
-		
-		
+
+		# Create building
 		building.initialize(offset_arr[0], 0.0,
 			floor_height * randi_range(min_floors, max_floors), mat)
 		add_child(building)
-		
+
 		# Make radar object
 		create_radar_polygon(offset_arr[0], 0, Color(10.6/255, 9.0/255, 10.2/255, 0.45))
 	else:
