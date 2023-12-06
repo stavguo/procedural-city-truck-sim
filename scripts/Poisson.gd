@@ -14,14 +14,19 @@ signal close_map
 @export var floor_height: int = 5
 @export var min_floors: int = 2
 @export var max_floors: int = 7
-
+@export var land_water_ratio: float = 0.8
 
 @onready var mapView = $MapView
+
 var fastNoiseLite
+var delaunay
 var spawn_locations: Array[PackedVector2Array] = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	mapView.position.x = poisson_width / 2
+	mapView.position.z = poisson_height / 2
+	mapView.set_size(poisson_height)
 	create_random_generator()
 	create_points()
 	var spawn_pos = spawn_locations[randi_range(0,spawn_locations.size() - 1)]
@@ -50,7 +55,7 @@ func _input(event):
 
 func create_points():
 	var rect = Rect2(0,0,poisson_width,poisson_height)
-	var delaunay = Delaunay.new(rect)
+	delaunay = Delaunay.new(rect)
 	var corners = PackedVector2Array([
 		Vector2(0, poisson_height),
 		Vector2(0, 0),
@@ -63,24 +68,34 @@ func create_points():
 		delaunay.add_point(points[i])
 	var triangles = delaunay.triangulate()
 	var sites = delaunay.make_voronoi(triangles)
+	sites = sites.filter(remove_border_site)
+	sites.sort_custom(sort_descending_noise)
+	print("Sites: {str}".format({"str": sites.size()}))
+	var islands_made: int = 0
 	for site in sites:
-		if !delaunay.is_border_site(site):
-			if site.neighbours.size() == site.source_triangles.size():
-				# TODO: Get all centers later and then choose land/water
-				#if fastNoiseLite.get_noise_2dv(site.center) > 0:
-				var building = building_scene.instantiate()
-				var mat = StandardMaterial3D.new()
-				mat.albedo_color = Color('#ffeecc')
-				mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
-				building.initialize(site.polygon, -1, 0, mat)
-				add_child(building)
-				
-				# Begin OBB subdivision on Voronoi cell
-				var obb_arr = get_obb(site.polygon)
-				subdivide(site.polygon, obb_arr)
-				continue
-		# Make radar object
-		create_radar_polygon(site.polygon, 0, Color(10.6/255, 9.0/255, 10.2/255, 0.45))
+		if islands_made < land_water_ratio * sites.size():
+			islands_made += 1
+			create_voronoi_site(site.polygon)
+	print("Islands made: {str}".format({"str": islands_made}))
+
+func remove_border_site(site: Delaunay.VoronoiSite) -> bool:
+	return !delaunay.is_border_site(site)
+
+func sort_descending_noise(a: Delaunay.VoronoiSite, b: Delaunay.VoronoiSite) ->bool:
+	return fastNoiseLite.get_noise_2dv(a.center) > fastNoiseLite.get_noise_2dv(b.center)
+
+func create_voronoi_site(polygon: PackedVector2Array) -> void:
+	# create concrete land mass
+	var building = building_scene.instantiate()
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color('#424245')
+	#mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
+	building.initialize(polygon, -1, 0, mat)
+	add_child(building)
+	
+	# create OBB buildings on top
+	var obb_arr = get_obb(polygon)
+	subdivide(polygon, obb_arr)
 
 func create_radar_polygon(points: PackedVector2Array, height: int, color: Color) -> void:
 	# Make radar object
@@ -210,7 +225,7 @@ func subdivide(vert_arr: PackedVector2Array, obb_arr: PackedVector2Array):
 		mat.set_texture(BaseMaterial3D.TEXTURE_ALBEDO, tex)
 		mat.set_flag(BaseMaterial3D.FLAG_USE_TEXTURE_REPEAT, true)
 		mat.set_texture_filter(BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS)
-		mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
+		#mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
 
 		# Create building
 		building.initialize(offset_arr[0], 0.0,
@@ -218,7 +233,7 @@ func subdivide(vert_arr: PackedVector2Array, obb_arr: PackedVector2Array):
 		add_child(building)
 
 		# Make radar object
-		create_radar_polygon(offset_arr[0], 0, Color(10.6/255, 9.0/255, 10.2/255, 0.45))
+		create_radar_polygon(offset_arr[0], 1, Color(10.6/255, 9.0/255, 10.2/255, 0.45))
 	else:
 		subdivide(split_data.p1, obb_arr1)
 		subdivide(split_data.p2, obb_arr2)

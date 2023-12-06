@@ -37,18 +37,19 @@ The main logic can be found in the script associated with the parent node, Node2
 - [ ] Incorporate Godot Road Generator
 - [ ] Add loading screen to beginning
 - [ ] Implement shadows
-- [ ] Building materials
-    - [ ] Brick types
-    - [ ] Window types
-- [ ] Create mlutiple islands using noise:
+- [x] Building textures
+- [x] Create mlutiple islands using noise:
     - [x] Poisson disc sample to generate points
     - [x] Use voronoi to form land blocks
     - [ ] Group land blocks together to form islands
-- [ ] Use geometry to find closest island coast edge to create bridge
+    - [ ] Use geometry to find closest island coast edge to create bridges
 - [ ] Create toon shader
 - [ ] Add skybox
 - [ ] Add sound
 - [ ] Improve speedometer/GUI
+- [ ] Compass in map and radar
+- [ ] Improve how roads are rendered in radar
+- [ ] Add infinite water shader
 To register changes, press the ```Tab``` button on your keyboard after modifying an inspector field. Then save the changes and rerun the project.
 ## Credits
 * This project was inspired by "[Procedural Generation of Parcels in Urban Modeling](https://www.cs.purdue.edu/cgvlab/papers/aliaga/eg2012.pdf)"

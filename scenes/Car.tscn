@@ -1,11 +1,11 @@
-[gd_scene load_steps=12 format=3 uid="uid://dnm3rdbgj8onl"]
+[gd_scene load_steps=13 format=3 uid="uid://dnm3rdbgj8onl"]
 
 [ext_resource type="Script" path="res://scripts/Car.gd" id="1_xb2gi"]
 [ext_resource type="PackedScene" uid="uid://csftpnswbqoun" path="res://scenes/WheelModel.tscn" id="2_4kxhf"]
 [ext_resource type="PackedScene" uid="uid://8sl5gmdd6o6w" path="res://scenes/Camera3D.tscn" id="3_amupv"]
-[ext_resource type="Script" path="res://scenes/Hud.gd" id="4_4plyc"]
 [ext_resource type="PackedScene" uid="uid://dkisky3hfeiu8" path="res://scenes/KeiModel.tscn" id="4_gwcox"]
-[ext_resource type="Texture2D" uid="uid://vff3fp7hg5x6" path="res://assets/materials/UI/black_circle.png" id="4_shilg"]
+[ext_resource type="Script" path="res://scripts/Hud.gd" id="4_oihfh"]
+[ext_resource type="Texture2D" uid="uid://ukk2dx243e1y" path="res://assets/materials/UI/white_circle.png" id="5_g4fk5"]
 [ext_resource type="Shader" path="res://assets/shaders/Minimap.gdshader" id="5_sxiln"]
 [ext_resource type="Script" path="res://scripts/FollowPlayerMinimap.gd" id="6_usem7"]
 [ext_resource type="Texture2D" uid="uid://bj8sb4qd75xx0" path="res://assets/materials/UI/maps-arrow.svg" id="8_dqhi5"]
@@ -13,6 +13,8 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xw00x"]
 shader = ExtResource("5_sxiln")
 shader_parameter/radius = 1.0
+
+[sub_resource type="Environment" id="Environment_54s1c"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_norm2"]
 size = Vector3(1, 1, 2.61)
@@ -90,20 +92,22 @@ speed = 10.0
 
 [node name="Hud" type="CanvasLayer" parent="."]
 layer = 2
-script = ExtResource("4_4plyc")
+script = ExtResource("4_oihfh")
 
 [node name="Speed" type="Label" parent="Hud"]
-anchors_preset = 7
-anchor_left = 0.5
+anchors_preset = 3
+anchor_left = 1.0
 anchor_top = 1.0
-anchor_right = 0.5
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -20.0
-offset_top = -23.0
-offset_right = 20.0
-grow_horizontal = 2
+offset_left = -80.0
+offset_top = -109.0
+offset_right = -40.0
+offset_bottom = -40.0
+grow_horizontal = 0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 50
+horizontal_alignment = 2
 
 [node name="TextureRect" type="TextureRect" parent="Hud"]
 self_modulate = Color(1, 1, 1, 0.45098)
@@ -119,7 +123,7 @@ scale = Vector2(0.75, 0.75)
 pivot_offset = Vector2(2.08165e-12, 512)
 size_flags_horizontal = 0
 size_flags_vertical = 8
-texture = ExtResource("4_shilg")
+texture = ExtResource("5_g4fk5")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="Hud/TextureRect"]
 material = SubResource("ShaderMaterial_xw00x")
@@ -139,10 +143,11 @@ render_target_update_mode = 4
 [node name="Camera3D" type="Camera3D" parent="Hud/TextureRect/SubViewportContainer/SubViewport"]
 transform = Transform3D(1, -6.97574e-16, -1.5246e-23, -1.5246e-23, -4.37114e-08, 1, -6.97574e-16, -1, -4.37114e-08, 0, 44.2625, 0)
 cull_mask = 2
+environment = SubResource("Environment_54s1c")
 projection = 1
 size = 15.0
 script = ExtResource("6_usem7")
-_followScanRadius = 90.0
+_followScanRadius = 180.0
 _playerTarget = NodePath("../../../../..")
 _playerRotationTarget = NodePath("../../../../../Look/Camera3D")
 
@@ -155,7 +160,7 @@ shape = SubResource("BoxShape3D_norm2")
 [node name="RadarIcon" type="Sprite3D" parent="."]
 transform = Transform3D(-1, -8.74228e-08, 3.82137e-15, -1.5246e-23, -4.37114e-08, -1, 8.74228e-08, -1, 4.37114e-08, 2.08165e-12, 2, 2.08165e-12)
 layers = 2
-pixel_size = 0.12
+pixel_size = 0.24
 texture = ExtResource("8_dqhi5")
 
 [node name="MapIcon" type="Sprite3D" parent="."]

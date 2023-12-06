@@ -120,6 +120,7 @@ static func make_building_radar_object(ground_points: PackedVector2Array,
 		
 		var mesh_inst = MeshInstance3D.new()
 		mesh_inst.mesh = surface_tool.commit()
+		mesh_inst.set_layer_mask_value(1, false)
 		mesh_inst.set_layer_mask_value(2, true)
 		mesh_inst.set_layer_mask_value(3, true)
 		meshes.append(mesh_inst)
