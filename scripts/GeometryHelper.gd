@@ -60,68 +60,59 @@ static func make_walls(ground_points: PackedVector2Array, bottom: float,
 		meshes.append(mesh_inst)
 	return meshes
 
-static func make_roof(ground_points: PackedVector2Array, height: float,
-	mat: StandardMaterial3D) -> Array[MeshInstance3D]:
+static func create_mesh_from_triangulation(points: PackedVector2Array, 
+	tris: Array[int], mat: StandardMaterial3D, height: float, col: bool) -> Array[MeshInstance3D]:
 	var meshes: Array[MeshInstance3D] = []
-	var tris = Geometry2D.triangulate_polygon(ground_points)
+	
+	var surface_tool = SurfaceTool.new()
 	for i in range(0, tris.size(), 3):
-		var surface_tool = SurfaceTool.new();
-		surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES);
+		
+		surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 		surface_tool.set_material(mat)
 		
-		var first = ground_points[tris[i]]
-		var second = ground_points[tris[i + 1]]
-		var third = ground_points[tris[i+ 2]]
+		var first = points[tris[i]]
+		var second = points[tris[i + 1]]
+		var third = points[tris[i+ 2]]
 		
-		surface_tool.set_normal(Vector3(1, 1, 1));
-		surface_tool.add_vertex(Vector3(first.x, height, first.y));
+		surface_tool.set_normal(Vector3(1, 1, 1))
+		surface_tool.add_vertex(Vector3(first.x, height, first.y))
 		
-		surface_tool.set_normal(Vector3(1, 1, 1));
-		surface_tool.add_vertex(Vector3(second.x, height, second.y));
+		surface_tool.set_normal(Vector3(1, 1, 1))
+		surface_tool.add_vertex(Vector3(second.x, height, second.y))
 		
-		surface_tool.set_normal(Vector3(1, 1, 1));
-		surface_tool.add_vertex(Vector3(third.x, height, third.y));
+		surface_tool.set_normal(Vector3(1, 1, 1))
+		surface_tool.add_vertex(Vector3(third.x, height, third.y))
 		
-		surface_tool.add_index(0);
-		surface_tool.add_index(1);
-		surface_tool.add_index(2);
+#		surface_tool.add_index(0);
+#		surface_tool.add_index(1);
+#		surface_tool.add_index(2);
+		surface_tool.index()
 		
 		var mesh_inst = MeshInstance3D.new()
 		mesh_inst.mesh = surface_tool.commit()
-		mesh_inst.create_trimesh_collision()
+		if col:
+			mesh_inst.create_trimesh_collision()
 		meshes.append(mesh_inst)
 	return meshes
 
-static func make_building_radar_object(ground_points: PackedVector2Array,
-		height: int, mat: StandardMaterial3D) -> Array[MeshInstance3D]:
-	var meshes: Array[MeshInstance3D] = []
-	var tris = Geometry2D.triangulate_polygon(ground_points)
-	for i in range(0, tris.size(), 3):
-		var surface_tool = SurfaceTool.new();
-		surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES);
-		surface_tool.set_material(mat)
-		
-		var first = ground_points[tris[i]]
-		var second = ground_points[tris[i + 1]]
-		var third = ground_points[tris[i+ 2]]
-		
-		surface_tool.set_normal(Vector3(1, 1, 1));
-		surface_tool.add_vertex(Vector3(first.x, height, first.y));
-		
-		surface_tool.set_normal(Vector3(1, 1, 1));
-		surface_tool.add_vertex(Vector3(second.x, height, second.y));
-		
-		surface_tool.set_normal(Vector3(1, 1, 1));
-		surface_tool.add_vertex(Vector3(third.x, height, third.y));
-		
-		surface_tool.add_index(0);
-		surface_tool.add_index(1);
-		surface_tool.add_index(2);
-		
-		var mesh_inst = MeshInstance3D.new()
-		mesh_inst.mesh = surface_tool.commit()
-		mesh_inst.set_layer_mask_value(1, false)
-		mesh_inst.set_layer_mask_value(2, true)
-		mesh_inst.set_layer_mask_value(3, true)
-		meshes.append(mesh_inst)
-	return meshes
+static func make_street_polygon(outer_points: PackedVector2Array,
+	inner_points: PackedVector2Array) -> PackedVector2Array:
+	# initialize closest_inner_index
+	var closest_inner_index: int = 0
+	# for every point in inner boundary
+	for i in range(inner_points.size()):
+		# store min AND idx in closest_inner_point
+		if outer_points[0].distance_to(inner_points[i]) < \
+			outer_points[0].distance_to(inner_points[closest_inner_index]):
+			closest_inner_index = i
+	# initialize closest_inner_point
+	var closest_inner_point: Vector2 = outer_points[closest_inner_index]
+	# Add repeat of first outer boundary point for polygon formation
+	outer_points.append(outer_points[0])
+	# TODO: Verify order of inner boundary, could be counter clockwise
+	for i in range(closest_inner_index, closest_inner_index - 
+		(inner_points.size() + 1), -1):
+		# Append point to outer_points (using modulo)
+		outer_points.append(inner_points[i % inner_points.size()])
+	# return Array[MeshInstance3D] of triangulation
+	return outer_points

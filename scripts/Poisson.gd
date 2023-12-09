@@ -20,6 +20,9 @@ signal close_map
 
 var fastNoiseLite
 var delaunay
+var street_mat
+var radar_mat
+var building_mats: Array[StandardMaterial3D] = []
 var spawn_locations: Array[PackedVector2Array] = []
 
 # Called when the node enters the scene tree for the first time.
@@ -27,6 +30,8 @@ func _ready():
 	mapView.position.x = poisson_width / 2
 	mapView.position.z = poisson_height / 2
 	mapView.set_size(poisson_height)
+	
+	create_mats()
 	create_random_generator()
 	create_points()
 	var spawn_pos = spawn_locations[randi_range(0,spawn_locations.size() - 1)]
@@ -53,6 +58,28 @@ func _input(event):
 			open_map.emit()
 			mapView.current = true
 
+func create_mats():
+	# make street layer1
+	street_mat = StandardMaterial3D.new()
+	street_mat.albedo_color = Color('#424245')
+	street_mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
+	# make street layer2
+	radar_mat = StandardMaterial3D.new()
+	radar_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	radar_mat.albedo_color = Color(1.0, 1.0, 1.0, 0.5)
+	radar_mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
+	# Make building material
+	var mat = StandardMaterial3D.new()
+	#mat.albedo_color = GeometryHelper.get_random_color()
+	var img = Image.load_from_file(ProjectSettings.globalize_path("res://assets/materials/buildings/prentis.png"))
+	var tex = ImageTexture.create_from_image(img)
+	#tex.set_size_override(Vector2i(512,512))
+	mat.set_texture(BaseMaterial3D.TEXTURE_ALBEDO, tex)
+	mat.set_flag(BaseMaterial3D.FLAG_USE_TEXTURE_REPEAT, true)
+	mat.set_texture_filter(BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS)
+	#mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
+	building_mats.append(mat)
+
 func create_points():
 	var rect = Rect2(0,0,poisson_width,poisson_height)
 	delaunay = Delaunay.new(rect)
@@ -70,13 +97,11 @@ func create_points():
 	var sites = delaunay.make_voronoi(triangles)
 	sites = sites.filter(remove_border_site)
 	sites.sort_custom(sort_descending_noise)
-	print("Sites: {str}".format({"str": sites.size()}))
 	var islands_made: int = 0
 	for site in sites:
 		if islands_made < land_water_ratio * sites.size():
 			islands_made += 1
 			create_voronoi_site(site.polygon)
-	print("Islands made: {str}".format({"str": islands_made}))
 
 func remove_border_site(site: Delaunay.VoronoiSite) -> bool:
 	return !delaunay.is_border_site(site)
@@ -85,28 +110,8 @@ func sort_descending_noise(a: Delaunay.VoronoiSite, b: Delaunay.VoronoiSite) ->b
 	return fastNoiseLite.get_noise_2dv(a.center) > fastNoiseLite.get_noise_2dv(b.center)
 
 func create_voronoi_site(polygon: PackedVector2Array) -> void:
-	# create concrete land mass
-	var building = building_scene.instantiate()
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color('#424245')
-	#mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
-	building.initialize(polygon, -1, 0, mat)
-	add_child(building)
-	
-	# create OBB buildings on top
 	var obb_arr = get_obb(polygon)
 	subdivide(polygon, obb_arr)
-
-func create_radar_polygon(points: PackedVector2Array, height: int, color: Color) -> void:
-	# Make radar object
-	var mat = StandardMaterial3D.new()
-	mat.flags_transparent = true
-	mat.albedo_color = color
-	mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
-	var radar: Array[MeshInstance3D] = GeometryHelper.make_building_radar_object(
-		points, height, mat)
-	for i in range(radar.size()):
-		add_child(radar[i])
 
 func create_random_generator():
 	var rng = RandomNumberGenerator.new()
@@ -211,29 +216,11 @@ func subdivide(vert_arr: PackedVector2Array, obb_arr: PackedVector2Array):
 		for i in range(vert_arr.size()):
 			spawn_locations.append(PackedVector2Array([vert_arr[i],
 				vert_arr[(i + 1) % vert_arr.size()]]))
-
-		# Offset buildings to create streets
-		var offset_arr = Geometry2D.offset_polygon(vert_arr, offset_poly, Geometry2D.JOIN_MITER)
 		var building = building_scene.instantiate()
-
-		# Make building material
-		var mat = StandardMaterial3D.new()
-		#mat.albedo_color = GeometryHelper.get_random_color()
-		var img = Image.load_from_file(ProjectSettings.globalize_path("res://assets/materials/buildings/prentis.png"))
-		var tex = ImageTexture.create_from_image(img)
-		#tex.set_size_override(Vector2i(512,512))
-		mat.set_texture(BaseMaterial3D.TEXTURE_ALBEDO, tex)
-		mat.set_flag(BaseMaterial3D.FLAG_USE_TEXTURE_REPEAT, true)
-		mat.set_texture_filter(BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS)
-		#mat.set_shading_mode(BaseMaterial3D.SHADING_MODE_UNSHADED)
-
-		# Create building
-		building.initialize(offset_arr[0], 0.0,
-			floor_height * randi_range(min_floors, max_floors), mat)
+		building.initialize(vert_arr, offset_poly, 0.0,
+			floor_height * randi_range(min_floors, max_floors), building_mats[0],
+			street_mat, radar_mat)
 		add_child(building)
-
-		# Make radar object
-		create_radar_polygon(offset_arr[0], 1, Color(10.6/255, 9.0/255, 10.2/255, 0.45))
 	else:
 		subdivide(split_data.p1, obb_arr1)
 		subdivide(split_data.p2, obb_arr2)

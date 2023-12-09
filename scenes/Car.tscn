@@ -1,14 +1,15 @@
-[gd_scene load_steps=13 format=3 uid="uid://dnm3rdbgj8onl"]
+[gd_scene load_steps=14 format=3 uid="uid://dnm3rdbgj8onl"]
 
 [ext_resource type="Script" path="res://scripts/Car.gd" id="1_xb2gi"]
 [ext_resource type="PackedScene" uid="uid://csftpnswbqoun" path="res://scenes/WheelModel.tscn" id="2_4kxhf"]
 [ext_resource type="PackedScene" uid="uid://8sl5gmdd6o6w" path="res://scenes/Camera3D.tscn" id="3_amupv"]
 [ext_resource type="PackedScene" uid="uid://dkisky3hfeiu8" path="res://scenes/KeiModel.tscn" id="4_gwcox"]
 [ext_resource type="Script" path="res://scripts/Hud.gd" id="4_oihfh"]
-[ext_resource type="Texture2D" uid="uid://ukk2dx243e1y" path="res://assets/materials/UI/white_circle.png" id="5_g4fk5"]
+[ext_resource type="Texture2D" uid="uid://vff3fp7hg5x6" path="res://assets/materials/UI/black_circle.png" id="5_f3wp4"]
 [ext_resource type="Shader" path="res://assets/shaders/Minimap.gdshader" id="5_sxiln"]
 [ext_resource type="Script" path="res://scripts/FollowPlayerMinimap.gd" id="6_usem7"]
 [ext_resource type="Texture2D" uid="uid://bj8sb4qd75xx0" path="res://assets/materials/UI/maps-arrow.svg" id="8_dqhi5"]
+[ext_resource type="Texture2D" uid="uid://byn1ey7bxlufw" path="res://assets/materials/UI/maps-arrow-black.svg" id="10_yrlaw"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_xw00x"]
 shader = ExtResource("5_sxiln")
@@ -123,7 +124,7 @@ scale = Vector2(0.75, 0.75)
 pivot_offset = Vector2(2.08165e-12, 512)
 size_flags_horizontal = 0
 size_flags_vertical = 8
-texture = ExtResource("5_g4fk5")
+texture = ExtResource("5_f3wp4")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="Hud/TextureRect"]
 material = SubResource("ShaderMaterial_xw00x")
@@ -166,5 +167,11 @@ texture = ExtResource("8_dqhi5")
 [node name="MapIcon" type="Sprite3D" parent="."]
 transform = Transform3D(-1, -1.50996e-07, 6.60024e-15, 0, -4.37114e-08, -1, 1.50996e-07, -1, 4.37114e-08, 2.08165e-12, 2, 2.08165e-12)
 layers = 4
-pixel_size = 0.5
+pixel_size = 0.65
 texture = ExtResource("8_dqhi5")
+
+[node name="MapIcon2" type="Sprite3D" parent="."]
+transform = Transform3D(-1, -1.50996e-07, 6.60024e-15, 0, -4.37114e-08, -1, 1.50996e-07, -1, 4.37114e-08, 2.08165e-12, 0.578558, 2.08165e-12)
+layers = 4
+pixel_size = 0.9
+texture = ExtResource("10_yrlaw")
